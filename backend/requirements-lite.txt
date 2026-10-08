@@ -1,0 +1,17 @@
+# Lite runtime (no PyTorch): int8 ONNX models, ~300 MB RAM. Used by the Dockerfile / Render.
+fastapi==0.115.12
+uvicorn==0.34.3
+pydantic==2.10.4
+python-multipart==0.0.32
+python-dotenv==1.0.1
+httpx==0.28.1
+openai==1.59.3
+PyYAML==6.0.2
+RapidFuzz==3.14.6
+numpy==2.2.6
+joblib==1.4.2
+onnxruntime==1.30.0
+tokenizers==0.23.2
+faiss-cpu==1.15.1
+pillow==12.3.0
+pytesseract==0.3.13

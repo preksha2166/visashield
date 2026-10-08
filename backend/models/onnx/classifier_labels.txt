@@ -1,0 +1,5 @@
+gov_impersonation
+opt_employer_fraud
+fake_job_task
+other_scam
+legitimate

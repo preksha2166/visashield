@@ -162,7 +162,7 @@ def injection_test(rows, use_llm: bool) -> dict:
 
 
 def to_markdown(report: dict) -> str:
-    clf_name = "fine-tuned DistilBERT" if report["classifier"].startswith("transformer") else report["classifier"]
+    clf_name = {"transformer": "fine-tuned DistilBERT (PyTorch fp32)", "onnx": "fine-tuned DistilBERT (ONNX int8, lite runtime)"}.get(report["classifier"].split(":")[0], report["classifier"])
     lines = [f"# VisaShield evaluation\n", f"Classifier: `{clf_name}` · Fusion: `{report['fusion']}`\n"]
     titles = {
         "real_world_test": "Real-world TEST set (independently written, held out)",
@@ -205,6 +205,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-llm", action="store_true")
     ap.add_argument("--show-test-errors", action="store_true", help="print TEST-set errors (only for the final report)")
+    ap.add_argument("--report-name", default="eval", help="output name in reports/ (e.g. eval_lite for the ONNX runtime)")
     args = ap.parse_args()
     use_llm = not args.no_llm
 
@@ -225,9 +226,9 @@ def main():
     report["in_distribution_test"].pop("errors")
 
     REPORTS.mkdir(exist_ok=True)
-    (REPORTS / "eval.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    (REPORTS / f"{args.report_name}.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     md = to_markdown(report)
-    (REPORTS / "eval.md").write_text(md, encoding="utf-8")
+    (REPORTS / f"{args.report_name}.md").write_text(md, encoding="utf-8")
     print(md)
 
 

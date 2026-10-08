@@ -52,8 +52,21 @@ class _Transformer:
         return np.concatenate(out)[:, self.order]
 
 
+class _Onnx:
+    name = "onnx:distilbert-finetuned-int8"
+
+    def predict_proba(self, texts: list[str]) -> np.ndarray:
+        from app import onnx_models
+
+        return onnx_models.classify_proba(texts)
+
+
 @lru_cache(maxsize=1)
 def get_classifier():
+    from app import onnx_models
+
+    if onnx_models.available("classifier") and (onnx_models.use_onnx() or not (config.CLASSIFIER_DIR / "config.json").exists()):
+        return _Onnx()
     if (config.CLASSIFIER_DIR / "config.json").exists():
         try:
             return _Transformer()

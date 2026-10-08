@@ -12,10 +12,10 @@ backend/.venv/
 backend/data/raw/
 backend/data/processed/
 
-# Large model weights (published separately / rebuilt by training)
+# Full-precision training artifacts (rebuilt by training). The lite deploy artifacts
+# (models/onnx/, models/fusion.joblib, models/rag/) ARE committed so Render can build.
 backend/models/classifier/
-backend/models/*.joblib
-backend/models/rag/
+backend/models/baseline.joblib
 
 # Logs
 backend/reports/*.log
@@ -32,3 +32,4 @@ Thumbs.db
 
 # Local tooling
 .claude/
+backend/.venv-lite/

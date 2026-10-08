@@ -57,6 +57,12 @@ def _embedder():
 
 
 def embed(texts: list[str]) -> np.ndarray:
+    # The int8 ONNX embedder (lite runtime) is used whenever it exists, both to build the
+    # index and to embed queries, so index and queries always come from the same model.
+    from app import onnx_models
+
+    if onnx_models.available("embedder"):
+        return onnx_models.embed(texts)
     return _embedder().encode(texts, normalize_embeddings=True, convert_to_numpy=True).astype("float32")
 
 

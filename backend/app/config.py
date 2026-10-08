@@ -17,6 +17,7 @@ EXAMPLES_PATH = DATA_DIR / "examples.json"
 
 MODELS_DIR = BACKEND_DIR / "models"
 CLASSIFIER_DIR = MODELS_DIR / "classifier"
+ONNX_DIR = MODELS_DIR / "onnx"  # int8 models for the lite (no-PyTorch) runtime
 BASELINE_PATH = MODELS_DIR / "baseline.joblib"
 FUSION_PATH = MODELS_DIR / "fusion.joblib"
 RAG_DIR = MODELS_DIR / "rag"
