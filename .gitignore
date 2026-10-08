@@ -33,3 +33,7 @@ Thumbs.db
 # Local tooling
 .claude/
 backend/.venv-lite/
+
+# Personal test recordings
+/voicemail.mp3
+*.m4a

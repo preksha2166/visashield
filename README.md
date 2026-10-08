@@ -20,7 +20,7 @@ International students are a top target for scammers because they **fear losing 
 
 ## What VisaShield does
 
-Paste a message, upload a screenshot, or **forward a suspicious email to `visashield@homingbox.net`**. Within seconds you get:
+Paste a message, upload a screenshot, **upload or record a voicemail**, or **forward a suspicious email to `visashield@homingbox.net`**. Within seconds you get:
 
 1. **A verdict and risk score**: likely scam, suspicious, or likely safe, plus the scam category.
 2. **Red flags with official sources**: e.g. *"US government agencies never ask you to pay fees or fines over the phone"*, linked to the DHS page that says so.
@@ -33,7 +33,7 @@ Paste a message, upload a screenshot, or **forward a suspicious email to `visash
 
 ```mermaid
 flowchart LR
-    IN["Text / screenshot (OCR) / email"] --> R["PII redaction"]
+    IN["Text / screenshot (OCR) /<br/>voicemail (Whisper) / email"] --> R["PII redaction"]
     R --> C["Fine-tuned DistilBERT<br/>5-class scam classifier"]
     R --> T["Tactic tagger<br/>authority, urgency, threats,<br/>secrecy, payment, PII, fees"]
     R --> V["Verification engine<br/>.gov checks, lookalike domains,<br/>domain age, email auth,<br/>spoofed numbers, 26 official rules"]
@@ -107,6 +107,7 @@ These point to the next improvements: an "academic/university impersonation" cat
 
 **Works:**
 - Text analysis end to end, screenshot OCR, `.eml` email analysis with header checks.
+- **Voicemail / call recordings:** upload a file or record in the browser. It's transcribed with Whisper (`whisper-large-v3-turbo` via Groq), then analyzed like any message.
 - The fine-tuned classifier, tactic tagger, verification engine, fusion model, RAG sources, action plans and FTC/IC3 report text.
 - A responsive web UI (mobile and desktop, light and dark).
 - The evaluation and ablation suite, and unit tests.
@@ -114,7 +115,6 @@ These point to the next improvements: an "academic/university impersonation" cat
 **Limited / not yet done:**
 - **LLM explanations and translation need an `LLM_API_KEY`** (e.g. Groq's free tier). Without one, explanations use English templates (detection is unaffected).
 - **Agentboxd email flow** runs as a poller (`python -m app.integrations.agentboxd --poll`), and a signed-webhook endpoint is ready for deployment. Messages that Agentboxd quarantines ("held") are only analyzed if the API key has the `messages:release` permission.
-- **Voicemail / audio input** is not implemented.
 - **Training data is partly synthetic.** In-domain scams don't exist as a public dataset. The real-world test sets are small (tens of messages), so treat the numbers as indicative, not definitive.
 - **The classifier is English-first.** Messages in other languages rely more on the verification signals.
 - **VisaShield can be wrong.** The UI always tells students to confirm with their DSO through official contact details.
@@ -172,7 +172,7 @@ To rebuild the lite models after retraining: `python -m training.export_onnx && 
 |---|---|
 | API | Python 3.12, FastAPI, Pydantic |
 | ML | PyTorch, Hugging Face Transformers (DistilBERT), scikit-learn, sentence-transformers, FAISS |
-| OCR | EasyOCR |
+| OCR / speech | EasyOCR (full) or Tesseract (lite); Whisper large-v3-turbo via Groq for voicemails |
 | LLM | Llama 3.3 70B (open weights) via Groq; any OpenAI-compatible endpoint (Featherless, OpenRouter, Gemini) |
 | Email agent | Agentboxd (inbox, replies, phishing/injection screening) |
 | Frontend | React 19, Vite, TypeScript, Tailwind CSS v4, lucide-react |

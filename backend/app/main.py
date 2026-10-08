@@ -41,7 +41,14 @@ def health():
         "classifier": clf.name,
         "fusion": fusion_info(),
         "rag_available": rag.available(),
+        "stt_available": _stt_available(),
     }
+
+
+def _stt_available() -> bool:
+    from app.ingest import stt
+
+    return stt.available()
 
 
 @app.get("/api/examples", response_model=list[Example])
@@ -78,6 +85,36 @@ async def analyze_image(file: UploadFile = File(...), language: str = Form("en")
         raise HTTPException(422, "We couldn't find readable text in that image. Try pasting the text instead.")
     situation = situation if situation in SITUATIONS else "not_responded"
     return await run_in_threadpool(analyze, text, language, situation, None, text)
+
+
+MAX_AUDIO = 20 * 1024 * 1024  # Whisper API upload limit is 25 MB
+
+
+@app.post("/api/analyze/audio", response_model=AnalyzeResponse)
+async def analyze_audio(file: UploadFile = File(...), language: str = Form("en"), situation: str = Form("not_responded")):
+    import os
+
+    from app.ingest import stt
+
+    if not stt.available():
+        raise HTTPException(503, "Voice transcription isn't configured on this server.")
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in stt.AUDIO_EXTS:
+        raise HTTPException(415, "Unsupported audio format. Try MP3, M4A, WAV, OGG or WEBM.")
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "Empty file.")
+    if len(data) > MAX_AUDIO:
+        raise HTTPException(413, "Recording too large (max 20 MB, about 20 minutes).")
+    try:
+        transcript, _ = await run_in_threadpool(stt.transcribe, data, file.filename or f"audio{ext}")
+    except Exception:
+        raise HTTPException(502, "Couldn't transcribe that recording. Try again, or paste what the caller said.")
+    if len(transcript) < 10:
+        raise HTTPException(422, "We couldn't hear any speech in that recording.")
+    situation = situation if situation in SITUATIONS else "not_responded"
+    # Same framing the classifier saw in training ("Voicemail: ...", "Call transcript: ...").
+    return await run_in_threadpool(analyze, f"Voicemail: {transcript}", language, situation, None, transcript)
 
 
 @app.post("/api/analyze/email", response_model=AnalyzeResponse)
