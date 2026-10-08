@@ -1,0 +1,28 @@
+# Render Blueprint: Dashboard -> New -> Blueprint -> select this repo.
+services:
+  - type: web
+    name: visashield
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: VISASHIELD_RUNTIME
+        value: onnx
+      - key: LLM_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: LLM_MODEL
+        value: openai/gpt-oss-120b
+      - key: AGENTBOXD_BASE_URL
+        value: https://api.agentboxd.com
+      # Secrets: set these yourself in the Render dashboard (Environment tab).
+      - key: LLM_API_KEY
+        sync: false
+      - key: AGENTBOXD_API_KEY
+        sync: false
+      - key: AGENTBOXD_INBOX_ID
+        sync: false
+      - key: AGENTBOXD_INBOX_ADDRESS
+        sync: false
+      - key: AGENTBOXD_WEBHOOK_SECRET
+        sync: false

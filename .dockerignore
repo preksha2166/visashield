@@ -8,3 +8,9 @@ backend/data/processed
 backend/reports/*.log
 frontend/node_modules
 frontend/dist
+backend/models/classifier
+backend/models/baseline.joblib
+backend/tests
+backend/training
+backend/reports
+backend/.venv-lite
