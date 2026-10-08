@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Fake ICE call about SEVIS",
+    "label": "gov_impersonation",
+    "text": "Call transcript: Hello, this is Officer Daniel Ross from the U.S. Immigration and Customs Enforcement, badge number 4471. Your SEVIS record has been flagged for termination due to missing documents and there is a warrant pending for your removal. To stop the deportation process you must pay a $1,850 compliance bond today. You can pay with Google Play gift cards or at a Bitcoin ATM. Do not hang up and do not contact your university or anyone else, this is a confidential federal investigation. Call me back at (212) 436-9315 if disconnected."
+  },
+  {
+    "title": "OPT employer letter for a fee",
+    "label": "opt_employer_fraud",
+    "text": "From: hr.nexoratech@gmail.com\nSubject: OPT Employment Offer - Start Immediately\n\nHi, we got your profile from an OPT student group. Nexora Tech Solutions can provide you an OPT employment offer letter and I-983 training plan within 24 hours so your unemployment days stop counting. Remote role, no interview needed. There is a one-time onboarding and E-Verify processing fee of $650 payable via Zelle. Reply today, only 3 spots left. Visit www.nexora-techsolutions.online to register."
+  },
+  {
+    "title": "WhatsApp task scam",
+    "label": "fake_job_task",
+    "text": "Hi! I'm Jessica, a recruiter from Amazon Talent team. We found your resume online. Part-time remote job: just rate products and boost hotel reviews from your phone, 20-30 minutes a day, earn $200-$500 daily, no experience needed. Training is free. To start you need to top up your work account with USDT to unlock your first set of tasks, your commission is paid back with the deposit. Add me on WhatsApp +1 (689) 555-0142 to begin."
+  },
+  {
+    "title": "Real DSO reminder (genuine)",
+    "label": "legitimate",
+    "text": "From: International Student and Scholar Services <isss@university.edu>\nSubject: Reminder: Update your U.S. address within 10 days\n\nDear students, F-1 students are required to report a change of U.S. address within 10 days of moving. Please log in to the myISSS portal with your university credentials and submit the Address Update e-form. ISSS will update your SEVIS record. If you have questions, contact your ISSS advisor during drop-in hours. ISSS will never ask you for payment or for your passport details over the phone."
+  }
+]
