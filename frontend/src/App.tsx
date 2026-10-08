@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { analyzeImage, analyzeText, ApiError, getExamples, getHealth, isMockMode } from './api'
+import { analyzeAudio, analyzeImage, analyzeText, ApiError, getExamples, getHealth, isMockMode } from './api'
 import { Footer } from './components/Footer'
 import { Header, type BackendStatus } from './components/Header'
 import { InputPanel, type AnalyzeInput } from './components/InputPanel'
@@ -66,7 +66,9 @@ export default function App() {
         const res =
           input.mode === 'image' && input.file
             ? await analyzeImage({ file: input.file, language: input.language, situation: input.situation })
-            : await analyzeText({ text: input.text, language: input.language, situation: input.situation })
+            : input.mode === 'audio' && input.file
+              ? await analyzeAudio({ file: input.file, language: input.language, situation: input.situation })
+              : await analyzeText({ text: input.text, language: input.language, situation: input.situation })
         setResult(res)
         setResultId((n) => n + 1)
         if (!mock && status === 'offline') void refreshHealth()

@@ -96,5 +96,6 @@ export function verdictStyle(verdict: string): VerdictStyle {
 }
 
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024
+export const MAX_AUDIO_BYTES = 20 * 1024 * 1024
 export const MAX_TEXT_CHARS = 10_000
 export const MIN_TEXT_CHARS = 10

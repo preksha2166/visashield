@@ -78,6 +78,12 @@ export interface AnalyzeImageRequest {
   situation: Situation
 }
 
+export interface AnalyzeAudioRequest {
+  file: File
+  language: string
+  situation: Situation
+}
+
 export interface HealthResponse {
   status: string
   llm_available: boolean

@@ -94,7 +94,7 @@ export function DecisionDetails({ category, category_probs, llm_used, latency_ms
 
         {extracted_text && (
           <div>
-            <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Text we read from your screenshot</h4>
+            <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Text we read from your screenshot or recording</h4>
             <pre className="mt-2 max-h-56 overflow-auto rounded-lg bg-slate-50 p-3 font-sans text-sm whitespace-pre-wrap text-slate-700 dark:bg-slate-950 dark:text-slate-300">
               {extracted_text}
             </pre>

@@ -1,6 +1,7 @@
 import { FALLBACK_EXAMPLES } from './examples'
 import { pickMockResponse } from './mock'
 import type {
+  AnalyzeAudioRequest,
   AnalyzeImageRequest,
   AnalyzeResponse,
   AnalyzeTextRequest,
@@ -153,4 +154,17 @@ export async function analyzeImage(req: AnalyzeImageRequest): Promise<AnalyzeRes
   form.append('language', req.language)
   form.append('situation', req.situation)
   return request<AnalyzeResponse>('/api/analyze/image', { method: 'POST', body: form }, ANALYZE_TIMEOUT_MS)
+}
+
+export async function analyzeAudio(req: AnalyzeAudioRequest): Promise<AnalyzeResponse> {
+  if (isMockMode()) {
+    await delay(2000)
+    const mock = pickMockResponse('', req.language, req.situation)
+    return { ...mock, extracted_text: mock.redacted_text }
+  }
+  const form = new FormData()
+  form.append('file', req.file)
+  form.append('language', req.language)
+  form.append('situation', req.situation)
+  return request<AnalyzeResponse>('/api/analyze/audio', { method: 'POST', body: form }, ANALYZE_TIMEOUT_MS)
 }

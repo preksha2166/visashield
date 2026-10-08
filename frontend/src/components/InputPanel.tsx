@@ -1,9 +1,9 @@
-import { FileText, ImageUp, Languages, LoaderCircle, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { FileAudio, FileText, ImageUp, Languages, LoaderCircle, Mic, ShieldCheck, Sparkles, Square, X } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type DragEvent, type FormEvent } from 'react'
-import { LANGUAGES, MAX_IMAGE_BYTES, MAX_TEXT_CHARS, MIN_TEXT_CHARS, SITUATIONS } from '../constants'
+import { LANGUAGES, MAX_AUDIO_BYTES, MAX_IMAGE_BYTES, MAX_TEXT_CHARS, MIN_TEXT_CHARS, SITUATIONS } from '../constants'
 import type { Example, Situation } from '../types'
 
-export type InputMode = 'text' | 'image'
+export type InputMode = 'text' | 'image' | 'audio'
 
 export interface AnalyzeInput {
   mode: InputMode
@@ -17,6 +17,15 @@ interface Props {
   examples: Example[]
   loading: boolean
   onSubmit: (input: AnalyzeInput) => void
+}
+
+const AUDIO_EXT = /\.(mp3|m4a|wav|ogg|opus|webm|flac|mp4|mpeg|mpga|aac|amr|3gp)$/i
+const MAX_RECORD_SECONDS = 180
+
+function formatSeconds(total: number): string {
+  const m = Math.floor(total / 60)
+  const s = Math.floor(total % 60)
+  return `${m}:${s.toString().padStart(2, '0')}`
 }
 
 const PLACEHOLDER = `Paste the suspicious message here, for example:
@@ -34,6 +43,13 @@ export function InputPanel({ examples, loading, onSubmit }: Props) {
   const [situation, setSituation] = useState<Situation>('not_responded')
   const [language, setLanguage] = useState('en')
   const [formError, setFormError] = useState<string | null>(null)
+  const [audio, setAudio] = useState<File | null>(null)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [recording, setRecording] = useState(false)
+  const [recSeconds, setRecSeconds] = useState(0)
+  const recorder = useRef<MediaRecorder | null>(null)
+  const recTimer = useRef<number | null>(null)
+  const audioInput = useRef<HTMLInputElement>(null)
   const fileInput = useRef<HTMLInputElement>(null)
   const textarea = useRef<HTMLTextAreaElement>(null)
   const ids = useId()
@@ -82,6 +98,80 @@ export function InputPanel({ examples, loading, onSubmit }: Props) {
     if (fileInput.current) fileInput.current.value = ''
   }
 
+  const audioObjectUrl = useRef<string | null>(null)
+  function setAudioFile(f: File | null) {
+    if (audioObjectUrl.current) URL.revokeObjectURL(audioObjectUrl.current)
+    audioObjectUrl.current = f ? URL.createObjectURL(f) : null
+    setAudioUrl(audioObjectUrl.current)
+    setAudio(f)
+  }
+
+  function acceptAudio(f: File | undefined | null) {
+    if (!f) return
+    if (!f.type.startsWith('audio/') && !AUDIO_EXT.test(f.name)) {
+      setFormError('Please choose an audio file (MP3, M4A, WAV, OGG or WEBM).')
+      return
+    }
+    if (f.size > MAX_AUDIO_BYTES) {
+      setFormError('That recording is larger than 20 MB. Try a shorter clip.')
+      return
+    }
+    setFormError(null)
+    setAudioFile(f)
+  }
+
+  function clearAudio() {
+    setAudioFile(null)
+    if (audioInput.current) audioInput.current.value = ''
+  }
+
+  function stopRecording() {
+    if (recTimer.current) window.clearInterval(recTimer.current)
+    recTimer.current = null
+    if (recorder.current && recorder.current.state !== 'inactive') recorder.current.stop()
+  }
+
+  async function startRecording() {
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setFormError("Your browser can't record audio here. Upload a recording instead.")
+      return
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mr = new MediaRecorder(stream)
+      const chunks: Blob[] = []
+      mr.ondataavailable = (e) => {
+        if (e.data.size) chunks.push(e.data)
+      }
+      mr.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop())
+        setRecording(false)
+        const type = mr.mimeType || 'audio/webm'
+        const ext = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm'
+        if (chunks.length) setAudioFile(new File(chunks, `recording.${ext}`, { type }))
+      }
+      recorder.current = mr
+      setFormError(null)
+      setRecSeconds(0)
+      setRecording(true)
+      mr.start()
+      recTimer.current = window.setInterval(() => {
+        setRecSeconds((sec) => {
+          if (sec + 1 >= MAX_RECORD_SECONDS) stopRecording()
+          return sec + 1
+        })
+      }, 1000)
+    } catch {
+      setFormError('Microphone access was blocked. Allow it in your browser, or upload a recording instead.')
+    }
+  }
+
+  // Release the microphone if the user switches tabs or leaves mid-recording.
+  useEffect(() => {
+    if (mode !== 'audio') stopRecording()
+  }, [mode])
+  useEffect(() => () => stopRecording(), [])
+
   function onDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault()
     setDragging(false)
@@ -113,8 +203,12 @@ export function InputPanel({ examples, loading, onSubmit }: Props) {
       setFormError('Choose a screenshot to check first.')
       return
     }
+    if (mode === 'audio' && (recording || !audio)) {
+      setFormError(recording ? 'Stop the recording first.' : 'Upload or record the voicemail first.')
+      return
+    }
     setFormError(null)
-    onSubmit({ mode, text: text.trim(), file, language, situation })
+    onSubmit({ mode, text: text.trim(), file: mode === 'audio' ? audio : file, language, situation })
   }
 
   const tabClass = (active: boolean) =>
@@ -152,6 +246,18 @@ export function InputPanel({ examples, loading, onSubmit }: Props) {
           <ImageUp className="size-4" aria-hidden />
           <span className="sm:hidden">Screenshot</span>
           <span className="hidden sm:inline">Upload screenshot</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id={`${ids}-tab-audio`}
+          aria-selected={mode === 'audio'}
+          aria-controls={`${ids}-panel-audio`}
+          className={tabClass(mode === 'audio')}
+          onClick={() => setMode('audio')}
+        >
+          <Mic className="size-4" aria-hidden />
+          Voicemail
         </button>
       </div>
 
@@ -283,6 +389,110 @@ export function InputPanel({ examples, loading, onSubmit }: Props) {
             <span className="text-sm text-slate-500 dark:text-slate-400">
               Texts, WhatsApp chats, emails, job posts · PNG or JPG, up to 10 MB
               <span className="hidden sm:inline"> · You can also paste with Ctrl/⌘+V</span>
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Audio panel */}
+      <div
+        role="tabpanel"
+        id={`${ids}-panel-audio`}
+        aria-labelledby={`${ids}-tab-audio`}
+        hidden={mode !== 'audio'}
+        className="mt-4"
+      >
+        <input
+          ref={audioInput}
+          id={`${ids}-audio`}
+          type="file"
+          accept="audio/*,.mp3,.m4a,.wav,.ogg,.opus,.webm,.amr,.3gp"
+          className="sr-only"
+          onChange={(e) => acceptAudio(e.target.files?.[0])}
+        />
+        {audio && audioUrl ? (
+          <div className="rounded-xl border border-slate-300 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/60 dark:text-teal-300">
+                <FileAudio className="size-5" aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-700 dark:text-slate-200">{audio.name}</span>
+              <button
+                type="button"
+                onClick={() => audioInput.current?.click()}
+                className="rounded-md px-2 py-1 text-sm font-medium text-teal-700 hover:bg-teal-50 dark:text-teal-300 dark:hover:bg-teal-950/50"
+              >
+                Replace
+              </button>
+              <button
+                type="button"
+                onClick={clearAudio}
+                aria-label="Remove recording"
+                className="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              >
+                <X className="size-4" aria-hidden />
+              </button>
+            </div>
+            <audio controls src={audioUrl} className="mt-3 w-full" />
+          </div>
+        ) : recording ? (
+          <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-xl border-2 border-red-300 bg-red-50 px-4 py-8 text-center dark:border-red-800 dark:bg-red-950/30">
+            <span className="flex items-center gap-2 font-medium text-red-800 dark:text-red-200">
+              <span className="size-2.5 animate-pulse rounded-full bg-red-600" aria-hidden />
+              Recording… {formatSeconds(recSeconds)}
+            </span>
+            <span className="text-sm text-slate-600 dark:text-slate-400">Play the voicemail on speaker near your microphone.</span>
+            <button
+              type="button"
+              onClick={stopRecording}
+              className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+            >
+              <Square className="size-4" aria-hidden />
+              Stop
+            </button>
+          </div>
+        ) : (
+          <div
+            onDragOver={(e) => {
+              e.preventDefault()
+              setDragging(true)
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setDragging(false)
+              acceptAudio(e.dataTransfer.files?.[0])
+            }}
+            className={`flex min-h-48 flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors ${
+              dragging
+                ? 'border-teal-600 bg-teal-50 dark:border-teal-400 dark:bg-teal-950/40'
+                : 'border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950'
+            }`}
+          >
+            <span className="flex size-12 items-center justify-center rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/60 dark:text-teal-300">
+              <Mic className="size-6" aria-hidden />
+            </span>
+            <span className="font-medium text-slate-800 dark:text-slate-200">Check a voicemail or call recording</span>
+            <div className="flex flex-wrap justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => audioInput.current?.click()}
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:border-teal-600 hover:text-teal-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-teal-400"
+              >
+                <FileAudio className="size-4" aria-hidden />
+                Upload recording
+              </button>
+              <button
+                type="button"
+                onClick={startRecording}
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:border-red-500 hover:text-red-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-red-400"
+              >
+                <span className="size-2.5 rounded-full bg-red-600" aria-hidden />
+                Record now
+              </button>
+            </div>
+            <span className="text-sm text-slate-500 dark:text-slate-400">
+              MP3, M4A, WAV, OGG or WEBM, up to 20 MB. We transcribe it, then check what the caller said.
             </span>
           </div>
         )}
