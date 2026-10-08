@@ -1,0 +1,312 @@
+# Official, checkable facts that scam messages commonly violate.
+# Patterns are Python `re` regexes applied to the LOWERCASED message text.
+# A rule fires if ANY trigger matches AND (if requires_any is present) ANY requires_any pattern matches.
+# Strings are single-quoted so backslashes are literal; apostrophes are avoided (use "don.?t" style).
+
+- id: gov_no_phone_payment
+  category: gov_impersonation
+  statement: "US government agencies (DHS, USCIS, ICE, SEVP) never ask you to pay fees or fines over the phone or by email."
+  triggers:
+    - '\b(pay|payment|fine|fee|bond|penalty|settle)\b.{0,50}\b(now|immediately|right away|today|tonight|within \d+ ?(minutes?|mins?|hours?|hrs?)|before (the )?end of (the )?(day|call))\b'
+    - '\b(pay|clear|settle)\b.{0,30}\b(the |this |a |your )?(fine|penalty|bond|bail)\b'
+    - '\b(fine|penalty|bail|bond) (of|is|amount)\b.{0,20}\$\s?\d'
+  requires_any:
+    - '\b(ice|uscis|dhs|homeland security|hsi|sevp|sevis|immigration|border patrol|cbp|fbi|police|sheriff|department of justice|doj|federal agent|deportation)\b'
+  source_url: "https://studyinthestates.dhs.gov/2026/02/beware-of-dhs-imposters-protecting-foreign-students-from-scams"
+  source_title: "DHS Study in the States: Beware of DHS Imposters (Feb 2026)"
+
+- id: gov_no_gift_card_crypto_wire
+  category: gov_impersonation
+  statement: "USCIS does not accept Western Union, MoneyGram, PayPal, Venmo or gift cards, and SEVP never asks for gift cards, wire transfers or bitcoin."
+  triggers:
+    - '\b(gift ?cards?|google ?play cards?|itunes cards?|apple cards?|ebay cards?|steam cards?|prepaid (debit )?cards?)\b'
+    - '\b(bitcoin|btc|usdt|tether|crypto(currency)?|crypto ?atm|bitcoin atm)\b'
+    - '\b(western union|moneygram|wire (transfer|the (money|funds|amount))|zelle|venmo|cash ?app|paypal)\b'
+  requires_any:
+    - '\b(ice|uscis|dhs|homeland security|hsi|sevp|sevis|immigration|border patrol|cbp|fbi|police|officer|agent|warrant|deport|deportation|visa|i-?94|a-?number|alien registration)\b'
+  source_url: "https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams/common-scams"
+  source_title: "USCIS: Common Scams (Payment Scams)"
+
+- id: gov_no_transfer_to_individual
+  category: gov_impersonation
+  statement: "DHS will never ask you to transfer money to an individual person's account."
+  triggers:
+    - '\b(transfer|send|wire|deposit|zelle)\b.{0,40}\b(to|into)\b.{0,15}\b(my|his|her|the officer.?s|the agent.?s|our agent.?s|a personal|this|the following)\b (account|name|number|wallet)\b'
+    - '\b(account holder|beneficiary|recipient) ?(name)?\s?:'
+  requires_any:
+    - '\b(ice|uscis|dhs|homeland security|hsi|sevp|sevis|immigration|deport|deportation|warrant|officer|agent)\b'
+  source_url: "https://studyinthestates.dhs.gov/2026/02/beware-of-dhs-imposters-protecting-foreign-students-from-scams"
+  source_title: "DHS Study in the States: Beware of DHS Imposters (Feb 2026)"
+
+- id: sevis_not_fixed_for_payment
+  category: gov_impersonation
+  statement: "SEVIS records are maintained by your school's DSO (and, on OPT, your own SEVP Portal reports); no caller can fix, restore or clear your SEVIS record for a fee."
+  triggers:
+    - '\b(fix|restore|reinstate|reactivate|unblock|unfreeze|clear|resolve|repair|correct|lift)\b.{0,50}\bsevis\b'
+    - '\bsevis\b.{0,60}\b(fix|restore|reinstate|reactivat|unblock|unfreeze|clear|resolv|repair|lift)'
+    - '\b(fix|resolve|repair|correct)\b.{0,30}\b(your )?(immigration |visa )?(status|record|case)\b.{0,40}\b(fee|payment|pay)\b'
+  requires_any:
+    - '\b(pay|paid|payment|fee|fine|gift ?card|bitcoin|crypto|wire|zelle|venmo|transfer|deposit)\b|\$\s?\d'
+  source_url: "https://studyinthestates.dhs.gov/schools/get-started/designated-school-official"
+  source_title: "DHS Study in the States: Designated School Official"
+
+- id: gov_no_secrecy_from_school
+  category: gov_impersonation
+  statement: "No real official will forbid you from contacting your school, DSO, family or a lawyer; demands for secrecy or to stay on the line are a scam tactic."
+  triggers:
+    - '\b(do not|don.?t|dont|never|must not|cannot|can.?t|not allowed to|forbidden to)\b (tell|inform|contact|call|speak (to|with)|talk (to|with)|discuss (this )?with|share (this )?with|notify)\b.{0,40}\b(anyone|anybody|your school|the school|university|college|dso|international (student )?(office|services)|isss|ois|oiss|advisor|family|friends|parents|lawyer|attorney|police|bank)\b'
+    - '\b(keep|stay)\b.{0,25}\b(this|it|the call|our conversation|this matter)\b.{0,15}\b(confidential|secret|private|between us)\b'
+    - '\b(stay|remain|keep (yourself|you)) on (the )?(line|phone|call)\b'
+    - '\b(gag order|confidentiality order|national security matter)\b'
+    - '\b(do not|don.?t|dont) (hang up|disconnect|end (this|the) call)\b'
+  requires_any:
+    - '\b(ice|uscis|dhs|homeland security|hsi|sevp|sevis|immigration|border patrol|cbp|fbi|police|officer|agent|warrant|deport|deportation|arrest|embassy|consulate|case)\b'
+  source_url: "https://www.colorado.edu/isss/2026/06/01/scam-alert-uscis-ar-11-phone-call-and-email"
+  source_title: "CU Boulder ISSS: USCIS AR-11 phone call and email scam (June 2026)"
+
+- id: gov_email_must_be_gov
+  category: gov_impersonation
+  statement: "Official US government email addresses end in .gov; USCIS email updates come from uscis@messages.dhs.gov and SEVP Portal emails from do-not-reply.SEVP@ice.dhs.gov."
+  triggers:
+    - '[a-z0-9._%+-]*(uscis|dhs|sevp|sevis|homeland|immigration|icegov|ice\.gov|ice-gov|iceagent|ice\.agent|fbi|hsi|cbp|govinfo|gov\.)[a-z0-9._%+-]*@(gmail|yahoo|outlook|hotmail|aol|icloud|proton|protonmail|gmx|zoho|mail|yandex)\.(com|me|net|ru)\b'
+    - '@[a-z0-9.-]*(uscis|dhs|sevp|sevis|homelandsecurity|homeland-security|immigration|ice-gov|icegov)[a-z0-9-]*\.(com|net|org|info|us|co|online|site|link|xyz|support|help|services|center|live)\b'
+    - '@[a-z0-9.-]*\.?gov\.(org|com|net|us|co|info)\b'
+    - '@[a-z0-9.-]*-gov\.(org|com|net|us|co|info|online)\b'
+  source_url: "https://www.uscis.gov/i-9-central/form-i-9-related-news/uscis-updates-have-a-new-email-address"
+  source_title: "USCIS: USCIS Updates Have a New Email Address"
+
+- id: gov_lookalike_website
+  category: gov_impersonation
+  statement: "Only trust .gov websites; scammers use .com, .org, .net, .info or look-alike addresses such as gov.org to copy government sites."
+  triggers:
+    - '\b(https?://)?(www\.)?[a-z0-9-]*(uscis|dhs|sevp|sevis|homelandsecurity|immigration|e-?verify|ic3|ice-gov|icegov)[a-z0-9-]*\.(com|net|org|info|us|co|online|site|link|xyz|support|help|services|center|live|top)\b'
+    - '\b(https?://)?(www\.)?[a-z0-9-]+\.gov\.(org|com|net|us|co|info)\b'
+    - '\b(https?://)?(www\.)?[a-z0-9-]+-gov\.(org|com|net|us|co|info|online)\b'
+    - '\b(https?://)?(www\.)?(uscis|ic3|dhs)\.(link|co|cc|top|xyz|support)\b'
+  source_url: "https://www.uscis.gov/avoid-scams"
+  source_title: "USCIS: Avoid Scams"
+
+- id: caller_id_can_be_spoofed
+  category: gov_impersonation
+  statement: "Caller ID can be faked: a call showing a real government, police or university number is not proof it is real; hang up and call the official number yourself."
+  triggers:
+    - '\b(check|look ?up|google|search|verify)\b.{0,30}\b(this|the|our|my) (number|caller id|phone number)\b.{0,60}\b(official|government|ice|uscis|dhs|police|fbi|real|legit|legitimate)\b'
+    - '\b(caller id|number on your (screen|phone)|number (you see|displayed|showing))\b.{0,60}\b(official|government|ice|uscis|dhs|police|proves?|real)\b'
+    - '\b(calling|i am calling|we are calling) (you )?from (the )?(official )?(ice|uscis|dhs|sevp|hsi|police|fbi|homeland security)\b.{0,30}\b(line|number|office|headquarters|department)\b'
+  requires_any:
+    - '\b(warrant|arrest|deport|deportation|fine|penalty|pay|payment|case|violation|sevis|i-?94|passport|bank|ssn|social security)\b'
+  source_url: "https://consumer.ftc.gov/articles/how-avoid-government-impersonation-scam"
+  source_title: "FTC: How To Avoid a Government Impersonation Scam"
+
+- id: gov_no_arrest_threat_by_phone
+  category: gov_impersonation
+  statement: "HSI agents and police do not call people to warn them they are about to be arrested, and do not demand money to cancel a warrant or investigation."
+  triggers:
+    - '\b(warrant|arrest|detain|detention|deport|deportation|removal|jail|prison|imprison|custody)\b.{0,80}\b(today|tonight|immediately|within \d+|unless|if you (do not|don.?t|fail to)|in the next|right now)\b'
+    - '\b(officers?|agents?|police|marshals?|deputies)\b.{0,30}\b(on (their|the) way|dispatched|being sent|coming to (your|you)|will (come|arrive|visit) (to )?your)\b'
+    - '\b(cancel|drop|remove|clear|lift|dismiss|close)\b.{0,25}\b(the |your |this )?(warrant|case|investigation|charges)\b.{0,50}\b(pay|fee|fine|bond|deposit|\$)'
+  requires_any:
+    - '\b(ice|uscis|dhs|homeland security|hsi|sevp|sevis|immigration|border patrol|cbp|fbi|police|sheriff|officer|agent|federal|embassy|consulate|i-?94|visa|passport)\b'
+  source_url: "https://www.ice.gov/news/releases/hsi-san-antonio-warns-public-about-spoofing-phone-calls"
+  source_title: "ICE: HSI San Antonio warns the public about spoofing phone calls"
+
+- id: gov_no_pii_by_phone_or_text
+  category: gov_impersonation
+  statement: "Government agents will not ask for your SSN, passport, A-number, I-94 or bank details over the phone, by text or by chat to 'verify' you."
+  triggers:
+    - '\b(ssn|social security( number)?|passport( number| details| copy| photo)?|a-?number|alien registration( number)?|i-?94( number)?|bank (account|routing|details|login)|routing number|card number|cvv|online banking)\b.{0,80}\b(over the phone|on this call|on the call|by phone|reply (to this|with)|text (it|them|back|us|me)|via (text|sms|whatsapp|telegram|chat)|on whatsapp|on telegram|send (it|them) (here|to me))\b'
+    - '\b(read|tell|give|confirm|spell out|text|send)\b (me|us|the officer|the agent)\b.{0,20}\b(your )?(full )?(ssn|social security|passport|a-?number|alien registration|i-?94|bank account|routing|card number|date of birth)\b'
+    - '\b(photo|picture|pic|screenshot|scan)s? of (your )?(passport|visa|i-?20|i-?94|ead|green card|ssn card|social security card)\b.{0,60}\b(whatsapp|telegram|text|reply|this number|me|us)\b'
+  requires_any:
+    - '\b(ice|uscis|dhs|homeland security|hsi|sevp|immigration|border patrol|cbp|fbi|police|sheriff|officer|agent|irs|social security administration|ssa|embassy|consulate|warrant|deport)\b'
+  source_url: "https://www.ice.gov/news/releases/hsi-michigan-and-ohio-warn-scammers-impersonating-special-agents"
+  source_title: "ICE: HSI Michigan and Ohio warn of scammers impersonating special agents"
+
+- id: gov_no_contact_via_social_or_messaging
+  category: gov_impersonation
+  statement: "USCIS will not contact you through personal social media, and the FBI, IC3 and FTC do not contact people through Telegram, WhatsApp or Messenger."
+  triggers:
+    - '\b(whatsapp|telegram|facebook messenger|messenger|instagram dm|signal|wechat|snapchat)\b'
+  requires_any:
+    - '\b(uscis|dhs|homeland security|hsi|ice (officer|agent|office)|sevp|fbi|ic3|ftc|federal agent|immigration officer|special agent)\b'
+  source_url: "https://www.ic3.gov/PSA/2026/PSA260720"
+  source_title: "FBI IC3 PSA I-072026-PSA: Criminals impersonating FBI and IC3 (July 2026)"
+
+- id: no_fee_to_recover_lost_money
+  category: any
+  statement: "FBI/IC3 and FTC never charge a fee to recover money you lost to a scam; 'recovery' offers that ask for payment are a second scam."
+  triggers:
+    - '\b(recover|get back|retrieve|reclaim|return|refund)\b.{0,50}\b(your )?(lost |stolen )?(money|funds|losses|crypto|deposit|savings)\b.{0,80}\b(fee|pay|deposit|tax|charge|processing|release)\b'
+    - '\b(fee|pay|payment|deposit|tax)\b.{0,50}\b(to )?(recover|release|unlock|refund|retrieve)\b.{0,30}\b(your )?(lost |stolen |frozen )?(money|funds|losses|crypto)\b'
+  requires_any:
+    - '\b(fbi|ic3|ftc|recovery|police|agent|investigat|attorney|lawyer|case (number|officer)|complaint)\b'
+  source_url: "https://www.ic3.gov/PSA/2026/PSA260720"
+  source_title: "FBI IC3 PSA I-072026-PSA: Criminals impersonating FBI and IC3 (July 2026)"
+
+- id: move_money_to_safe_account
+  category: any
+  statement: "No real bank or government agency will ever tell you to move your money to a 'safe' account, crypto or gold to protect it."
+  triggers:
+    - '\b(move|transfer|withdraw|shift)\b.{0,40}\b(money|funds|savings|balance|cash)\b.{0,60}\b(safe|secure|protected|new|government|federal|holding|escrow) (account|wallet|vault|location)\b'
+    - '\b(safe|secure|protected|holding|federal reserve|government) (account|wallet)\b.{0,60}\b(transfer|move|deposit|send)\b'
+    - '\b(bitcoin|crypto) ?atm\b'
+    - '\b(gold bars?)\b'
+  source_url: "https://consumer.ftc.gov/consumer-alerts/2024/01/did-someone-tell-you-move-or-transfer-your-money-it-could-be-scam"
+  source_title: "FTC: Did someone tell you to move or transfer your money? It could be a scam"
+
+- id: employer_no_upfront_fees
+  category: fake_job_task
+  statement: "Honest employers never ask you to pay to get a job; fees for training, equipment, onboarding, background checks or placement are a scam sign."
+  triggers:
+    - '\b(registration|training|onboarding|processing|placement|application|activation|certification|background[- ]check|starter kit|equipment|uniform|software|laptop|security|enrollment|membership|visa processing|sponsorship) (fee|deposit|charge|cost|payment)\b'
+    - '\b(pay|deposit|send|transfer)\b.{0,30}(\$\s?\d+|\bfee\b|refundable deposit).{0,50}\b(to (start|begin|secure|confirm|activate|join|reserve)|before (you )?(start|begin|onboard|can work)|to get (the|your) (job|position|offer))\b'
+    - '\b(refundable|security) deposit\b.{0,40}\b(job|position|role|onboarding|training|equipment)\b'
+  requires_any:
+    - '\b(job|position|role|hiring|recruit|recruiter|employ|employment|offer letter|job offer|work from home|remote work|salary|internship|interview|hr|onboard|onboarding)\b'
+  source_url: "https://consumer.ftc.gov/articles/job-scams"
+  source_title: "FTC: Job Scams"
+
+- id: stem_opt_employer_must_use_everify
+  category: opt_employer_fraud
+  statement: "STEM OPT employers must be enrolled in E-Verify, have an EIN, and sign Form I-983 themselves; students cannot sign the employer section."
+  triggers:
+    - '\b(not|aren.?t|isn.?t|no need( for)?|don.?t need|do not need|without|never)\b.{0,25}\be-?verify\b'
+    - '\be-?verify\b.{0,30}\b(not required|isn.?t required|is not required|not needed|optional|doesn.?t matter|does not matter|skip|unnecessary)\b'
+    - '\b(sign|fill|complete|fill out|fill in)\b.{0,25}\b(the )?(employer (section|part|portion|signature)|employer attestation)\b.{0,40}\b(yourself|on your own|for us|on our behalf)\b'
+    - '\b(you|student) (can|may|should|will) (sign|fill|complete) (the )?(i-?983|training plan)\b.{0,30}\b(yourself|for (us|the employer|the company)|on (our|the employer.?s) behalf)\b'
+    - '\b(borrow|use|rent|share) (our|my|a|an|the) (e-?verify|ein)\b'
+  source_url: "https://www.uscis.gov/working-in-the-united-states/students-and-exchange-visitors/optional-practical-training-extension-for-stem-students-stem-opt"
+  source_title: "USCIS: Optional Practical Training Extension for STEM Students (STEM OPT)"
+
+- id: opt_paid_employment_letter_is_fraud
+  category: opt_employer_fraud
+  statement: "Paying a company for an OPT/STEM OPT offer letter, employment verification or I-983 without real work is visa fraud; ICE has prosecuted such schemes."
+  triggers:
+    - '\b(pay|paid|fee|charge|cost|price|package|plan)\b.{0,60}\b(employment|offer|experience|verification|employer|joining|relieving) letters?\b'
+    - '\b(employment|offer|experience|verification|employer|joining) letters?\b.{0,60}(\b(pay|fee|charge|cost|price|only)\b|\$\s?\d)'
+    - '(\$\s?\d+|\b(pay|fee|charge|package|plan|subscription)\b).{0,60}\b(i-?983|e-?verify (letter|support)|opt (employer|job|compliance|placement|support|sponsor|letter)|stem opt (employer|extension|letter|support|sponsor|job))\b'
+    - '\b(i-?983|opt (employer|compliance|placement|support|letter)|stem opt (employer|extension|letter|support))\b.{0,60}(\$\s?\d+|\b(fee|pay|charge|package|plan|subscription)\b)'
+    - '\b(no|without|zero) (actual|real) (work|job|duties)\b'
+    - '\b(stay|keep|remain|maintain)\b.{0,20}\b(your )?(opt|status|sevis|visa)\b.{0,20}\b(active|valid|compliant|in status)\b.{0,60}(\$\s?\d|\b(pay|fee|package|plan|subscription)\b)'
+    - '\b(guaranteed|100%|full) (opt|stem opt|sevis|visa) (compliance|approval|status)\b'
+  requires_any:
+    - '\b(opt|stem|i-?983|e-?verify|sevis|unemployment days|f-?1|ead|dso|cpt|h-?1b)\b'
+  source_url: "https://www.ice.gov/news/releases/chinese-businesswoman-indicted-student-visa-work-visa-fraud-charges"
+  source_title: "ICE: Businesswoman indicted on student-visa, work-visa fraud charges (fake employment verification for fees)"
+
+- id: stem_opt_no_volunteer_or_name_only
+  category: opt_employer_fraud
+  statement: "A STEM OPT employer may not be an employer in name only, and STEM OPT cannot be unpaid volunteer work; at least 20 hours a week of real, compensated training is required."
+  triggers:
+    - '\b(unpaid|volunteer|no pay|without pay|no salary|zero salary|stipend[- ]free)\b.{0,50}\bstem[- ]?opt\b'
+    - '\bstem[- ]?opt\b.{0,50}\b(unpaid|volunteer|no pay|without pay|no salary)\b'
+    - '\b(on paper|in name only|paper (job|employer|position)|name[- ]only)\b.{0,40}\b(opt|stem|employer|job|position)\b'
+    - '\b(you (do not|don.?t|dont) (actually |really )?(have to|need to) (work|come in|show up))\b'
+  source_url: "https://www.uscis.gov/working-in-the-united-states/students-and-exchange-visitors/optional-practical-training-extension-for-stem-students-stem-opt"
+  source_title: "USCIS: Optional Practical Training Extension for STEM Students (STEM OPT)"
+
+- id: opt_unemployment_days_not_for_sale
+  category: opt_employer_fraud
+  statement: "Post-completion OPT allows up to 90 unemployment days (150 total with the 24-month STEM extension); paying a company to 'stop the clock' does not create real employment."
+  triggers:
+    - '\b(unemployment (days|clock|counter|limit)|days of unemployment)\b.{0,80}(\$\s?\d|\b(pay|fee|subscribe|subscription|package|plan|enroll|buy)\b)'
+    - '(\$\s?\d|\b(pay|fee|subscribe|subscription|package|plan|enroll|buy)\b).{0,80}\b(unemployment (days|clock|counter|limit)|days of unemployment)\b'
+    - '\b(stop|pause|freeze|reset)\b.{0,15}\b(your |the )?(unemployment )?(clock|counter|days)\b'
+  requires_any:
+    - '\b(opt|stem|sevis|f-?1|ead|unemployment)\b'
+  source_url: "https://www.uscis.gov/working-in-the-united-states/students-and-exchange-visitors/optional-practical-training-extension-for-stem-students-stem-opt"
+  source_title: "USCIS: Optional Practical Training Extension for STEM Students (STEM OPT)"
+
+- id: opt_employer_red_flags_remote_chat
+  category: opt_employer_fraud
+  statement: "SEVP lists red flags for fraudulent OPT employers: vague websites, offshore HR/payroll, home addresses with no staff, mass hiring of F-1 students, and work done only remotely or through apps like WeChat."
+  triggers:
+    - '\b(hr|payroll|manager|supervisor|team|onboarding)\b.{0,40}\b(based in|located in|from) (india|china|overseas|abroad|offshore)\b'
+    - '\b(all|entire|whole) (work|training|job|onboarding|communication)\b.{0,30}\b(through|via|on|over) (wechat|whatsapp|telegram)\b'
+    - '\b(hiring|onboarding|placing) (dozens|hundreds|\d{2,}) (of )?(f-?1|opt|stem opt|international) (students|graduates)\b'
+  requires_any:
+    - '\b(opt|stem|i-?983|e-?verify|sevis|f-?1)\b'
+  source_url: "https://www.ice.gov/doclib/sevis/pdf/bcm260302.pdf"
+  source_title: "SEVP Broadcast Message 2603-02: STEM OPT Employer Fraud (March 2026)"
+
+- id: task_scam_deposit_to_unlock
+  category: fake_job_task
+  statement: "Jobs that pay you to like, rate or 'boost' products and then ask you to deposit your own money (usually crypto) to unlock earnings are task scams."
+  triggers:
+    - '\b(deposit|top ?up|recharge|reload|pay)\b.{0,60}\b(unlock|withdraw|release|access|activate|continue)\b.{0,40}\b(earnings|commissions?|balance|tasks?|profits?|salary|wages|account)\b'
+    - '\b(unlock|withdraw|release)\b.{0,40}\b(your )?(earnings|commissions?|balance|profits?)\b.{0,60}\b(deposit|top ?up|recharge|usdt|crypto|bitcoin)\b'
+    - '\b(product|app|data|order|review|merchant|hotel|movie|music) (boost|boosting|optimi[sz]ation|optimi[sz]ing|rating|submission)s?\b'
+    - '\b(negative|frozen|insufficient|pending) balance\b'
+    - '\b(combination|combo|lucky|premium|bonus) (order|task|product|set)s?\b'
+    - '\b(like|rate|review|boost|subscribe to|follow)\b.{0,30}\b(products?|apps?|videos?|hotels?|movies?|songs?|channels?|accounts?)\b.{0,60}\b(earn|commission|\$\s?\d|paid|per task)\b'
+  source_url: "https://consumer.ftc.gov/consumer-alerts/2025/08/how-spot-and-avoid-task-scams"
+  source_title: "FTC: How to spot and avoid task scams"
+
+- id: fake_check_overpayment
+  category: fake_job_task
+  statement: "If someone sends you a check and asks you to send part back or pay a vendor, it is a fake-check scam; funds showing in your account do not mean the check is good."
+  triggers:
+    - '\b(deposit|cash|mobile[- ]deposit)\b.{0,40}\b(the |this |a |our )?(check|cheque)\b.{0,140}\b(send|zelle|wire|transfer|return|refund|forward|purchase|buy|vendor|supplier|gift ?cards?|bitcoin|crypto|money order)\b'
+    - '\b(overpaid|overpayment|sent you (too much|extra)|extra (amount|funds))\b.{0,80}\b(send|return|refund|zelle|wire|transfer)\b'
+    - '\b(check|cheque)\b.{0,80}\b(equipment|supplies|laptop|office|software|decals?)\b.{0,80}\b(vendor|supplier|designated|approved|our partner)\b'
+  source_url: "https://consumer.ftc.gov/articles/how-spot-avoid-and-report-fake-check-scams"
+  source_title: "FTC: How To Spot, Avoid, and Report Fake Check Scams"
+
+- id: unsolicited_job_via_chat_or_text
+  category: fake_job_task
+  statement: "Real employers don't recruit through random texts, WhatsApp or Telegram messages; generic job texts asking you to reply YES are a known scam."
+  triggers:
+    - '\b(whatsapp|telegram|signal)\b.{0,80}\b(job|position|role|hiring|recruit|interview|part[- ]time|earn|salary|daily pay|per day)\b'
+    - '\b(job|position|hiring|recruit|recruiter|part[- ]time|remote work|work from home|interview)\b.{0,80}\b(whatsapp|telegram|signal)\b'
+    - '\breply\s+["“]?(yes|y|interested|1)["”]?\b.{0,60}\b(job|position|work|earn|income|opportunity|details)\b'
+    - '\b(job|position|work|earn|income|opportunity)\b.{0,80}\breply\s+["“]?(yes|interested)\b'
+    - '\$\s?\d{2,4}\s?(-|to)?\s?(\$\s?\d{2,4})?\s?(per|a|/)\s?day\b'
+  requires_any:
+    - '\b(earn|salary|pay|paid|income|commission|flexible|part[- ]time|remote|hiring|recruit)\b'
+  source_url: "https://consumer.ftc.gov/consumer-alerts/2026/04/job-offer-text-probably-scam"
+  source_title: "FTC: That job offer text is probably a scam (April 2026)"
+
+- id: recruiter_pii_before_interview
+  category: fake_job_task
+  statement: "Legitimate recruiters use a company email domain and interview you before asking for SSN, ID or bank details for payroll."
+  triggers:
+    - '\b(ssn|social security|bank (account|details|info|information)|routing number|driver.?s license|passport|photo id|id card)\b.{0,80}\b(before|prior to) (the |your |an |any )?interview\b'
+    - '\b(hired|offer(ed)?|selected|approved)\b.{0,60}\b(without|no|skip(ping)?( the)?) (an? )?(interview|background check)\b'
+    - '\b(recruiter|hr|hiring manager|talent (acquisition|partner)|onboarding)\b.{0,80}@(gmail|yahoo|outlook|hotmail|aol|proton|icloud)\.(com|me)\b'
+    - '@(gmail|yahoo|outlook|hotmail|aol|proton|icloud)\.(com|me)\b.{0,80}\b(hr|recruit|recruiter|hiring|onboarding|talent)\b'
+  source_url: "https://consumer.ftc.gov/consumer-alerts/2025/07/job-scammers-are-looking-hire-you"
+  source_title: "FTC: Job scammers are looking to hire you (July 2025)"
+
+- id: no_fee_for_scholarship
+  category: other_scam
+  statement: "You never have to pay to apply for, hold or claim a scholarship; 'guaranteed' or 'you're a finalist' offers asking for fees are scams."
+  triggers:
+    - '\b(scholarship|grant|bursary|award|financial aid)\b.{0,80}\b(processing|redemption|application|holding|release|disbursement|registration|activation|clearance) (fee|charge|payment)\b'
+    - '(\$\s?\d+|\b(fee|pay)\b).{0,60}\b(claim|release|hold|secure|reserve|activate)\b.{0,30}\b(your )?(scholarship|grant|award)\b'
+    - '\b(guaranteed|money[- ]back)\b.{0,40}\b(scholarship|grant)\b'
+    - '\bfinalist\b.{0,60}\b(scholarship|grant|award)\b'
+  source_url: "https://consumer.ftc.gov/articles/how-avoid-scholarship-and-financial-aid-scams"
+  source_title: "FTC: How To Avoid Scholarship and Financial Aid Scams"
+
+- id: rental_deposit_unseen_wire
+  category: other_scam
+  statement: "Landlords who can't show the place and want deposits by wire, gift card or crypto are a classic rental scam."
+  triggers:
+    - '\b(deposit|rent|first month|last month|security deposit|hold (the|this) (room|apartment|unit|place)|reserve (the|this) (room|apartment|unit))\b.{0,80}\b(wire|western union|moneygram|gift ?cards?|crypto|bitcoin|zelle|cash ?app|friends (and|&) family)\b'
+    - '\b(out of (the )?(country|state|town)|abroad|overseas|on a mission|deployed|travell?ing)\b.{0,100}\b(deposit|rent|keys?|mail (you )?the keys|ship (you )?the keys)\b'
+    - '\b(can.?t|cannot|unable to|no) (show|viewing|showing|tour)\b.{0,60}\b(deposit|rent|pay)\b'
+  requires_any:
+    - '\b(apartment|room|rent|rental|lease|landlord|sublet|sublease|housing|studio|unit|roommate|bedroom)\b'
+  source_url: "https://consumer.ftc.gov/articles/rental-listing-scams"
+  source_title: "FTC: Rental Listing Scams"
+
+- id: tuition_discount_or_fee_threat
+  category: other_scam
+  statement: "Pay tuition and fees only through your school's official channels; 'discounted tuition' agents and calls threatening deportation over unpaid fees are known scams."
+  triggers:
+    - '\b(discount|discounted|cheaper|lower rate|reduced|\d{1,2} ?%( off)?)\b.{0,40}\btuition\b'
+    - '\btuition\b.{0,40}\b(discount|cheaper|% off|percent off|lower exchange rate|special channel|better rate)\b'
+    - '\b(pay|paying|settle)\b (your )?(tuition|fees) (for|on behalf of) you\b'
+    - '\b(unpaid|outstanding|overdue|pending)\b.{0,40}\b(tuition|fee|fees|balance|dues)\b.{0,100}\b(deport|deportation|arrest|visa (will be )?(cancel|revok)|sevis (will be )?terminat|police)\b'
+  source_url: "https://www.colorado.edu/isss/2024/10/18/scam-alert-unpaid-cu-boulder-fees-phone-scam"
+  source_title: "CU Boulder ISSS: Unpaid CU Boulder fees phone scam (Oct 2024)"
