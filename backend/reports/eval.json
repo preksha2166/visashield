@@ -1,0 +1,260 @@
+{
+  "classifier": "transformer:distilbert-finetuned",
+  "fusion": "trained (expert prior, lam=0.01)",
+  "real_world_test": {
+    "metrics": {
+      "tfidf_baseline": {
+        "precision": 0.926,
+        "recall": 0.676,
+        "f1": 0.781,
+        "false_positive_rate": 0.105,
+        "accuracy": 0.75,
+        "tp": 25,
+        "fp": 2,
+        "fn": 12,
+        "tn": 17,
+        "category_macro_f1": 0.61
+      },
+      "transformer": {
+        "precision": 0.933,
+        "recall": 0.757,
+        "f1": 0.836,
+        "false_positive_rate": 0.105,
+        "accuracy": 0.804,
+        "tp": 28,
+        "fp": 2,
+        "fn": 9,
+        "tn": 17,
+        "category_macro_f1": 0.816
+      },
+      "fusion_no_classifier": {
+        "precision": 0.8,
+        "recall": 0.973,
+        "f1": 0.878,
+        "false_positive_rate": 0.474,
+        "accuracy": 0.821,
+        "tp": 36,
+        "fp": 9,
+        "fn": 1,
+        "tn": 10,
+        "category_macro_f1": 0.362
+      },
+      "fusion_no_verify": {
+        "precision": 0.935,
+        "recall": 0.784,
+        "f1": 0.853,
+        "false_positive_rate": 0.105,
+        "accuracy": 0.821,
+        "tp": 29,
+        "fp": 2,
+        "fn": 8,
+        "tn": 17,
+        "category_macro_f1": 0.804
+      },
+      "full_fusion": {
+        "precision": 0.969,
+        "recall": 0.838,
+        "f1": 0.899,
+        "false_positive_rate": 0.053,
+        "accuracy": 0.875,
+        "tp": 31,
+        "fp": 1,
+        "fn": 6,
+        "tn": 18,
+        "category_macro_f1": 0.876
+      }
+    },
+    "errors": [
+      {
+        "label": "gov_impersonation",
+        "risk": 0.162,
+        "text": "so weird thing happened. my phone showed the university's main number calling so I picked up. the guy said he was from the 'international compliance unit' and t"
+      },
+      {
+        "label": "gov_impersonation",
+        "risk": 0.084,
+        "text": "From: IRS Refunds <refunds@irs-taxrefund-center.com>\nSubject: Tax Refund Payment - Action Required for .edu Account Holders\n\nOur records indicate you are eligib"
+      },
+      {
+        "label": "gov_impersonation",
+        "risk": 0.499,
+        "text": "From: Office of International Students <intl.student.office.advising@gmail.com>\nSubject: URGENT: Your I-20 has been flagged\n\nHello,\n\nDuring our fall SEVIS audit"
+      },
+      {
+        "label": "fake_job_task",
+        "risk": 0.029,
+        "text": "I thought it was a real side job. The app had me 'boost' hotel listings by rating them, and the first two days I actually got $35 and $52 sent to my account. On"
+      },
+      {
+        "label": "fake_job_task",
+        "risk": 0.034,
+        "text": "From: Prof. Helen Marsh <helenmarsh.research.lab@gmail.com>\nSubject: RESEARCH ASSISTANT\n\nHello,\n\nI am looking for a student research assistant to help with data"
+      },
+      {
+        "label": "other_scam",
+        "risk": 0.173,
+        "text": "From: Global Tuition Partners <payments@globaltuitionpartners.co>\nSubject: Save 15% on your Spring tuition - authorized university payment agent\n\nDear Student,\n"
+      },
+      {
+        "label": "legitimate",
+        "risk": 0.688,
+        "text": "UNO Alert: Students have reported calls from people claiming to be ICE, IRS, CBP, FBI or local police saying your immigration status is in jeopardy. Government "
+      }
+    ],
+    "n": 56,
+    "n_scam": 37
+  },
+  "real_world_dev": {
+    "metrics": {
+      "tfidf_baseline": {
+        "precision": 0.967,
+        "recall": 0.659,
+        "f1": 0.784,
+        "false_positive_rate": 0.056,
+        "accuracy": 0.742,
+        "tp": 29,
+        "fp": 1,
+        "fn": 15,
+        "tn": 17,
+        "category_macro_f1": 0.576
+      },
+      "transformer": {
+        "precision": 0.933,
+        "recall": 0.955,
+        "f1": 0.944,
+        "false_positive_rate": 0.167,
+        "accuracy": 0.919,
+        "tp": 42,
+        "fp": 3,
+        "fn": 2,
+        "tn": 15,
+        "category_macro_f1": 0.819
+      },
+      "fusion_no_classifier": {
+        "precision": 0.86,
+        "recall": 0.977,
+        "f1": 0.915,
+        "false_positive_rate": 0.389,
+        "accuracy": 0.871,
+        "tp": 43,
+        "fp": 7,
+        "fn": 1,
+        "tn": 11,
+        "category_macro_f1": 0.452
+      },
+      "fusion_no_verify": {
+        "precision": 0.955,
+        "recall": 0.955,
+        "f1": 0.955,
+        "false_positive_rate": 0.111,
+        "accuracy": 0.935,
+        "tp": 42,
+        "fp": 2,
+        "fn": 2,
+        "tn": 16,
+        "category_macro_f1": 0.813
+      },
+      "full_fusion": {
+        "precision": 0.956,
+        "recall": 0.977,
+        "f1": 0.966,
+        "false_positive_rate": 0.111,
+        "accuracy": 0.952,
+        "tp": 43,
+        "fp": 2,
+        "fn": 1,
+        "tn": 16,
+        "category_macro_f1": 0.835
+      }
+    },
+    "errors": [
+      {
+        "label": "other_scam",
+        "risk": 0.085,
+        "text": "From: Student Financial Services <sfs.billing.dept@outlook.com>\nSubject: FINAL NOTICE - unpaid tuition\n\nYour spring registration and I-20 will be cancelled toda"
+      },
+      {
+        "label": "legitimate",
+        "risk": 0.856,
+        "text": "From: SEVP Portal <sevp.portal@ice.dhs.gov>\nSubject: Action required: OPT employment information\n\nOur records indicate you have accrued unemployment time on pos"
+      },
+      {
+        "label": "legitimate",
+        "risk": 0.821,
+        "text": "Chase: Did you make a $412.99 purchase at BESTBUY.COM? Reply Y or N. To speak to us, call the number on the back of your card. We'll never ask for your password"
+      }
+    ],
+    "n": 62,
+    "n_scam": 44
+  },
+  "injection": {
+    "n_attacked": 405,
+    "full_fusion_still_flagged": 0.891
+  },
+  "in_distribution_test": {
+    "metrics": {
+      "tfidf_baseline": {
+        "precision": 0.968,
+        "recall": 0.953,
+        "f1": 0.961,
+        "false_positive_rate": 0.043,
+        "accuracy": 0.955,
+        "tp": 368,
+        "fp": 12,
+        "fn": 18,
+        "tn": 268,
+        "category_macro_f1": 0.961
+      },
+      "transformer": {
+        "precision": 0.984,
+        "recall": 0.961,
+        "f1": 0.972,
+        "false_positive_rate": 0.021,
+        "accuracy": 0.968,
+        "tp": 371,
+        "fp": 6,
+        "fn": 15,
+        "tn": 274,
+        "category_macro_f1": 0.974
+      },
+      "fusion_no_classifier": {
+        "precision": 0.827,
+        "recall": 0.632,
+        "f1": 0.717,
+        "false_positive_rate": 0.182,
+        "accuracy": 0.71,
+        "tp": 244,
+        "fp": 51,
+        "fn": 142,
+        "tn": 229,
+        "category_macro_f1": 0.312
+      },
+      "fusion_no_verify": {
+        "precision": 0.987,
+        "recall": 0.961,
+        "f1": 0.974,
+        "false_positive_rate": 0.018,
+        "accuracy": 0.97,
+        "tp": 371,
+        "fp": 5,
+        "fn": 15,
+        "tn": 275,
+        "category_macro_f1": 0.975
+      },
+      "full_fusion": {
+        "precision": 0.987,
+        "recall": 0.959,
+        "f1": 0.972,
+        "false_positive_rate": 0.018,
+        "accuracy": 0.968,
+        "tp": 370,
+        "fp": 5,
+        "fn": 16,
+        "tn": 275,
+        "category_macro_f1": 0.975
+      }
+    },
+    "n": 666,
+    "n_scam": 386
+  }
+}
