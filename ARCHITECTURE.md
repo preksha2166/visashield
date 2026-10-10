@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Event / track** | ForgeHacks 2026 · AI + Cybersecurity |
-| **Team** | Preksha Dewoolkar (AI/ML lead) · Chirag Patankar (frontend, deployment) |
+| **Team** | Preksha Dewoolkar (AI/ML and backend lead) · Chirag Patankar (frontend and deployment lead) |
 | **Code** | https://github.com/preksha2166/visashield |
 | **Forward-to-check email** | visashield@homingbox.net |
 | **Built** | October 3–10, 2026, entirely during the hackathon |

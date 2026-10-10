@@ -191,10 +191,10 @@ To rebuild the lite models after retraining: `python -m training.export_onnx && 
 
 ## Team
 
-| Member | Role |
-|---|---|
-| **Preksha Dewoolkar** ([@preksha2166](https://github.com/preksha2166)) | AI/ML lead: research and knowledge base, datasets and synthetic data, fine-tuned DistilBERT classifier, verification engine and official-rule base, fusion model, RAG and LLM explainer, evaluation and prompt-injection testing, Agentboxd email agent, API |
-| **Chirag Patankar** ([@ChiragPatankar](https://github.com/ChiragPatankar)) | Frontend web app (React/Tailwind), deployment (Docker) |
+| Member | Share | Role |
+|---|---|---|
+| **Preksha Dewoolkar** ([@preksha2166](https://github.com/preksha2166)) | ~60% | **AI/ML and backend lead:** problem research, official-source knowledge base and the 26 rules, datasets (public, synthetic and the independent real-world test set), fine-tuned DistilBERT classifier, tactic tagger, verification engine, fusion model, RAG and multilingual LLM explainer, Whisper voicemail transcription, FastAPI backend, int8 ONNX lite runtime, Agentboxd email agent, evaluation with ablations and prompt-injection tests |
+| **Chirag Patankar** ([@ChiragPatankar](https://github.com/ChiragPatankar)) | ~40% | **Frontend and deployment lead:** the React + TypeScript + Tailwind web app (text, screenshot and voicemail inputs including in-browser recording; result card with verdict banner and risk gauge, red flags with sources, tactic chips, action checklist, copyable FTC/IC3 report and the "How we decided" panel; responsive light/dark design), single-container Docker setup and Render deployment |
 
 ## Built during ForgeHacks
 
