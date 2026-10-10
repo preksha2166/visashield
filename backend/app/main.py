@@ -1,7 +1,7 @@
 """FastAPI app. Run: uvicorn app.main:app --reload  (from backend/)"""
 import json
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -126,10 +126,10 @@ async def analyze_email(file: UploadFile = File(...), language: str = Form("en")
 
 
 @app.post("/api/webhooks/agentboxd")
-async def agentboxd_webhook(request: Request):
+async def agentboxd_webhook(request: Request, background: BackgroundTasks):
     from app.integrations.agentboxd import handle_webhook
 
-    return await handle_webhook(request)
+    return await handle_webhook(request, background)
 
 
 # Serve the built frontend (single-container deploy) when frontend/dist exists.

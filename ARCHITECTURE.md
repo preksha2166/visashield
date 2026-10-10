@@ -323,6 +323,7 @@ sequenceDiagram
     A->>S: Verdict, red flags, steps, report, Agentboxd scores
 ```
 - **Two modes:** a poller for laptops (`python -m app.integrations.agentboxd --poll`, add `--dry-run` to print replies without sending), and a webhook for deployment (`/api/webhooks/agentboxd`, HMAC-SHA256 over `"<timestamp>.<raw body>"`).
+- **Webhook handling:** Agentboxd counts a delivery as failed after 10 seconds, and analysis plus the LLM call plus sending the reply can take longer. So the webhook verifies the signature, answers immediately, and does the work in the background. It reads the message ID from either payload format (`data.message_id` in envelope mode, `data.message.id` in full mode). If there is no ID, it checks all unread messages instead. Processed messages are labelled `visashield-checked`, so a redelivered event never sends a second reply.
 - Agentboxd's own phishing and prompt-injection scores are included in the reply as an independent second opinion; they don't change the VisaShield verdict.
 - Messages Agentboxd quarantines ("held") are analyzed on purpose (suspicious mail is exactly what students forward), if the API key has the `messages:release` permission.
 

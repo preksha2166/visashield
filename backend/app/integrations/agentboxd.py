@@ -21,8 +21,7 @@ import time
 from typing import Any, Optional
 
 import httpx
-from fastapi import HTTPException, Request
-from fastapi.concurrency import run_in_threadpool
+from fastapi import BackgroundTasks, HTTPException, Request
 
 from app import config  # noqa: F401  (loads .env)
 from app.pipeline import analyze
@@ -258,21 +257,41 @@ def _verify_signature(raw: bytes, signature: str, timestamp: str) -> bool:
     return hmac.compare_digest(expected, signature)
 
 
-async def handle_webhook(request: Request) -> dict:
+def event_message_id(event: dict) -> Optional[str]:
+    """Message id of a message.received event. Envelope payloads carry data.message_id; full
+    payloads nest the message under data.message and don't document its id, so check both."""
+    data = event.get("data") or {}
+    return data.get("message_id") or (data.get("message") or {}).get("id") or data.get("id")
+
+
+def process_event(msg_id: Optional[str]) -> None:
+    """Webhook work, run after the response is sent. Without a message id, check every unread
+    inbound message instead (the poller's sweep); already-checked messages are skipped."""
+    try:
+        with _client() as client:
+            ids = [msg_id] if msg_id else [m["id"] for m in fetch_unread(client)]
+            for i in ids:
+                try:
+                    result = process_message(client, fetch_message(client, i))
+                    print(f"[agentboxd] {result.get('id')}: {result.get('skipped') or result['verdict']}")
+                except httpx.HTTPError as e:
+                    print(f"[agentboxd] {i}: error: {e}")
+    except httpx.HTTPError as e:
+        print(f"[agentboxd] error: {e}")
+
+
+async def handle_webhook(request: Request, background: BackgroundTasks) -> dict:
     raw = await request.body()
     if not _verify_signature(raw, request.headers.get("X-Mailroom-Signature", ""), request.headers.get("X-Mailroom-Timestamp", "")):
         raise HTTPException(401, "invalid signature")
     event = await request.json()
     if event.get("type") != "message.received" or not available():
         return {"ok": True, "ignored": event.get("type")}
-    msg_id = (event.get("data") or {}).get("id") or (event.get("data") or {}).get("message_id")
-
-    def run() -> dict:
-        with _client() as client:
-            return process_message(client, fetch_message(client, msg_id))
-
-    result = await run_in_threadpool(run)
-    return {"ok": True, **{k: v for k, v in result.items() if k != "reply_text"}}
+    msg_id = event_message_id(event)
+    # Agentboxd counts a delivery as failed after 10 s, and analysis + LLM + reply can take
+    # longer, so acknowledge now and do the work in the background.
+    background.add_task(process_event, msg_id)
+    return {"ok": True, "queued": msg_id or "unread"}
 
 
 if __name__ == "__main__":
