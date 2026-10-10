@@ -7,6 +7,13 @@ VisaShield helps international students in the US **recognize, verify, and respo
 
 **Try it live: https://visashield.onrender.com** (free hosting: the first visit after a quiet spell can take about a minute to wake up). Or forward a suspicious email to `visashield@homingbox.net`.
 
+| | |
+|---|---|
+| ![Likely scam verdict with risk score and next steps](docs/screenshots/verdict.png) | ![The same kind of answer in Hindi](docs/screenshots/hindi.png) |
+| **A verdict in seconds:** risk score, scam type and what to do now | **In the student's language:** here, a genuine DSO email checked in Hindi |
+| ![How we decided: classifier confidence and redacted input](docs/screenshots/how_we_decided.png) | ![VisaShield's reply to a forwarded scam email](docs/screenshots/email_reply.png) |
+| **Explainable:** the verdict comes from the trained models, not the LLM | **By email:** forward a suspicious message and get a reply in the same thread |
+
 ---
 
 ## The problem
