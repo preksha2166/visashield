@@ -187,7 +187,7 @@ def process_message(client: httpx.Client, msg: dict, send: bool = True) -> dict:
         out = {"id": msg["id"], "verdict": res.verdict, "risk": res.risk_score, "reply_text": reply}
     if send:
         inbox = msg.get("inbox_id") or INBOX_ID
-        r = client.post(f"/inboxes/{inbox}/messages/{msg['id']}/reply", json={"text": reply})
+        r = client.post(f"/inboxes/{inbox}/messages/{msg['id']}/reply", json={"text": out["reply_text"]})
         r.raise_for_status()
         client.patch(f"/messages/{msg['id']}", json={"is_read": True, "add_labels": [DONE_LABEL]}).raise_for_status()
         out["replied"] = True
@@ -274,10 +274,10 @@ def process_event(msg_id: Optional[str]) -> None:
                 try:
                     result = process_message(client, fetch_message(client, i))
                     print(f"[agentboxd] {result.get('id')}: {result.get('skipped') or result['verdict']}")
-                except httpx.HTTPError as e:
-                    print(f"[agentboxd] {i}: error: {e}")
-    except httpx.HTTPError as e:
-        print(f"[agentboxd] error: {e}")
+                except Exception as e:  # log and move on to the next message
+                    print(f"[agentboxd] {i}: error: {type(e).__name__}: {e}")
+    except Exception as e:
+        print(f"[agentboxd] error: {type(e).__name__}: {e}")
 
 
 async def handle_webhook(request: Request, background: BackgroundTasks) -> dict:

@@ -53,6 +53,34 @@ def test_webhook_without_id_sweeps_unread(monkeypatch):
     assert calls == [None]
 
 
+class _FakeClient:
+    def __init__(self):
+        self.posts = []
+
+    def post(self, path, json):
+        self.posts.append((path, json))
+        return self
+
+    def patch(self, path, json):
+        return self
+
+    def raise_for_status(self):
+        return None
+
+
+def test_quarantined_message_gets_reply(monkeypatch):
+    monkeypatch.setattr(agentboxd, "INBOX_ID", "inbox")
+    held = {
+        "id": "m1", "from": "student@gmail.com", "labels": ["ai:phishing"],
+        "withheld": {"state": "held", "reason": "phishing"}, "ai": {"risk": {"phishing": 0.98}},
+    }
+    client = _FakeClient()
+    out = agentboxd.process_message(client, held)
+    assert out["verdict"] == "quarantined" and out["replied"]
+    path, body = client.posts[0]
+    assert path == "/inboxes/inbox/messages/m1/reply" and "QUARANTINED AS LIKELY SCAM" in body["text"]
+
+
 def test_webhook_rejects_bad_or_old_signatures(monkeypatch):
     calls = _setup(monkeypatch)
     body = {"type": "message.received", "data": {"message_id": "m1"}}
