@@ -42,7 +42,7 @@ flowchart LR
     V --> F
     F --> X["Verdict + reasons"]
     KB[("Official sources<br/>DHS, USCIS, FTC, ICE, IC3")] --> RAG["Retrieval<br/>MiniLM + FAISS"]
-    X --> L["LLM explainer<br/>(open-weight Llama 3.3 70B)"]
+    X --> L["LLM explainer<br/>(open-weight gpt-oss-120b)"]
     RAG --> L
     L --> OUT["Explanation, action plan,<br/>report, translation"]
 ```
@@ -52,7 +52,7 @@ flowchart LR
 - **Verification engine:** deterministic checks the text model can't make: a claimed agency with a non-.gov address, lookalike domains (homoglyphs and brand abbreviations), domain age via RDAP, cheap high-abuse TLDs, SPF/DKIM/DMARC failures, a free-mail "recruiter", known spoofed numbers, and **26 official rules** (each linked to its USCIS/DHS/FTC/ICE source). Sentences that *warn about* scams are recognized and not counted, so a school's scam alert isn't flagged as a scam.
 - **Fusion:** logistic regression trained on a validation split the classifier never saw, using *classifier dropout* so it learns to rely on verification signals too (they generalize better to new scam wording).
 - **RAG:** 107 chunks from official guidance, embedded with `all-MiniLM-L6-v2` in FAISS, so explanations cite real sources.
-- **LLM (open-weight Llama 3.3 70B via Groq; any OpenAI-compatible provider works):** turns the verdict, red flags and retrieved sources into a plain-language explanation and action plan in the student's language. The deterministic action plan is the safety floor: if the LLM drops steps, the original plan is used.
+- **LLM (OpenAI's open-weight `gpt-oss-120b` via Groq; any OpenAI-compatible provider works):** turns the verdict, red flags and retrieved sources into a plain-language explanation and action plan in the student's language. The deterministic action plan is the safety floor: if the LLM drops steps, the original plan is used.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the full design.
 
@@ -173,7 +173,7 @@ To rebuild the lite models after retraining: `python -m training.export_onnx && 
 | API | Python 3.12, FastAPI, Pydantic |
 | ML | PyTorch, Hugging Face Transformers (DistilBERT), scikit-learn, sentence-transformers, FAISS |
 | OCR / speech | EasyOCR (full) or Tesseract (lite); Whisper large-v3-turbo via Groq for voicemails |
-| LLM | Llama 3.3 70B (open weights) via Groq; any OpenAI-compatible endpoint (Featherless, OpenRouter, Gemini) |
+| LLM | gpt-oss-120b (open weights) via Groq; any OpenAI-compatible endpoint (Featherless, OpenRouter, Gemini) |
 | Email agent | Agentboxd (inbox, replies, phishing/injection screening) |
 | Frontend | React 19, Vite, TypeScript, Tailwind CSS v4, lucide-react |
 | Data | UCI SMS Spam Collection, EMSCAD (Real or Fake Job Postings), phishing-email corpus (Hugging Face), synthetic in-domain data |
