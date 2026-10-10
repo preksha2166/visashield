@@ -5,6 +5,8 @@ VisaShield helps international students in the US **recognize, verify, and respo
 
 > ForgeHacks 2026 · Track: **AI + Cybersecurity**
 
+**Try it live: https://visashield.onrender.com** (free hosting: the first visit after a quiet spell can take about a minute to wake up). Or forward a suspicious email to `visashield@homingbox.net`.
+
 ---
 
 ## The problem
