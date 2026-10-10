@@ -54,7 +54,7 @@ flowchart LR
 - **RAG:** 107 chunks from official guidance, embedded with `all-MiniLM-L6-v2` in FAISS, so explanations cite real sources.
 - **LLM (OpenAI's open-weight `gpt-oss-120b` via Groq; any OpenAI-compatible provider works):** turns the verdict, red flags and retrieved sources into a plain-language explanation and action plan in the student's language. The deterministic action plan is the safety floor: if the LLM drops steps, the original plan is used.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full design.
+See the [technical report](ARCHITECTURE.md) for the full design, data, evaluation, error analysis and security details.
 
 ## Evaluation
 
