@@ -44,9 +44,12 @@ def export(module, inputs: dict, out_name: str, output_name: str, op_types=None)
         module.eval(), tuple(inputs.values()), str(fp32), input_names=list(inputs), output_names=[output_name],
         dynamic_axes=axes, opset_version=17, dynamo=False,
     )
-    # Per-channel int8. op_types=["MatMul"] keeps the embedding table in fp32 (more accurate, but
+    # Per-channel 8-bit. op_types=["MatMul"] keeps the embedding table in fp32 (more accurate, but
     # the classifier would then exceed GitHub's 100 MB file limit, so it quantizes everything).
-    quantize_dynamic(str(fp32), str(OUT / f"{out_name}.onnx"), weight_type=QuantType.QInt8, per_channel=True, op_types_to_quantize=op_types)
+    # Unsigned weights (U8U8): the default signed weights (U8S8) saturate on x86 CPUs without
+    # VNNI, which made the classifier output near-constant probabilities on Render's servers
+    # while it worked on VNNI laptops.
+    quantize_dynamic(str(fp32), str(OUT / f"{out_name}.onnx"), weight_type=QuantType.QUInt8, per_channel=True, op_types_to_quantize=op_types)
     fp32.unlink()
     print(f"wrote {OUT / f'{out_name}.onnx'} ({(OUT / f'{out_name}.onnx').stat().st_size / 1e6:.1f} MB)")
 

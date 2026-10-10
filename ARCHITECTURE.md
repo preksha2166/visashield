@@ -43,7 +43,7 @@ International students in the US are heavily targeted by scammers who impersonat
 | Precision / recall | 0.969 / 0.838 |
 | False-positive rate on hard genuine messages | **5.3%** (classifier alone: 10.5%) |
 | Scams still flagged under prompt-injection attack (405 attacked messages) | **89.1%** (91.4% without the attack) |
-| Detection latency on CPU, median | **48 ms** (deployed lite runtime), 64 ms (full runtime) |
+| Detection latency on CPU, median | **about 0.1 s** (118 ms deployed lite runtime, 64 ms full runtime) |
 | Memory of the deployed runtime | about 270–300 MB, fits a 512 MB free instance |
 
 ---
@@ -390,19 +390,21 @@ Because the LLM never decides the verdict, the injected instructions have nothin
 | Real-world TEST set | F1 | False-positive rate | Under injection |
 |---|---|---|---|
 | Full runtime (PyTorch) | 0.899 | 5.3% | 89.1% |
-| Lite runtime (int8 ONNX, deployed) | 0.866 | 5.3% | 89.9% |
+| Lite runtime (int8 ONNX, deployed) | 0.899 | 5.3% | 88.9% |
 
-The int8 model misses 2 more scams on the test set. On the DEV set the two runtimes are identical (F1 0.966).
+The lite runtime matches full precision on both real-world sets (DEV F1 0.966 for both).
+
+**A bug only the server showed.** The first deployed build used onnxruntime's default int8 format (signed weights, "U8S8"). onnxruntime documents that this format can saturate on x86 CPUs without VNNI instructions, which is the likely cause. Our laptop has VNNI, so the model worked there and scored F1 0.866. On Render's server, though, the classifier returned almost the same probabilities for every message, so only the tactic and verification signals were deciding. We found it by comparing live and local outputs for the same messages. Re-exporting with unsigned weights ("U8U8", `training/export_onnx.py`) fixed it and recovered the full-precision accuracy, at the cost of some speed (§8.5).
 
 ### 8.5 Latency
 Measured over the 56 test messages on a laptop CPU, detection only (no LLM, no RDAP):
 
 | Runtime | Median | 95th percentile | Max |
 |---|---|---|---|
-| Lite (int8 ONNX, 1 thread) | 48 ms | 63 ms | 70 ms |
+| Lite (int8 ONNX, 1 thread) | 118 ms | 181 ms | 224 ms |
 | Full (PyTorch) | 64 ms | 76 ms | 80 ms |
 
-The LLM explanation and RDAP lookups add network round trips on top of this. Every response reports its own `latency_ms`.
+The unsigned-weight lite models (§8.4) are slower than the original signed ones were on this laptop (48 ms median), but they give correct results on every CPU. The LLM explanation and RDAP lookups add network round trips on top of this. Every response reports its own `latency_ms`.
 
 ### 8.6 Error analysis (test set, full fusion)
 | Error | Risk | Why it was missed |
